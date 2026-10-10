@@ -11,6 +11,7 @@ SECRET_KEY = "django-insecure-change-this-key-before-deploying-hms-project"
 DEBUG = True
 ALLOWED_HOSTS =  [
     "hospital-management-system-five-nu.vercel.app",
+    "hospital-management-system-3n9vm56p8-sims24.vercel.app",
     "localhost",
     "127.0.0.1",
 ]
