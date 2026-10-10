@@ -1,0 +1,34 @@
+{% extends 'dash_base.html' %}
+{% block title %}Book an appointment - Sanjeevani Hospital{% endblock %}
+{% block dash_content %}
+<div class="page-head">
+  <div>
+    <h1>Book an appointment</h1>
+    <p>Choose a doctor and a day, then pick one of the free times.</p>
+  </div>
+</div>
+<div class="panel" style="max-width: 760px;">
+  <div class="panel-body">
+    <form method="post" novalidate data-slots-url="{% url 'slots_api' 0 %}">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+      {% include 'partials/_field.html' with field=form.doctor %}
+      <div class="row">
+        <div class="col-md-6">{% include 'partials/_field.html' with field=form.date %}</div>
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label class="form-label" for="id_time">Time <span class="text-danger">*</span></label>
+            <select name="time" id="id_time" class="form-select" data-selected="{{ form.time.value|default_if_none:'' }}">
+              <option value="">Choose a doctor and date first</option>
+            </select>
+            {% for error in form.time.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+        </div>
+      </div>
+      {% include 'partials/_field.html' with field=form.reason %}
+      <button type="submit" class="btn btn-primary">Request appointment</button>
+      <p class="text-muted small mt-3 mb-0">Your request stays pending until the hospital or the doctor confirms it. You can cancel it any time before the visit.</p>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'dash_base.html' %}
+{% block title %}Admin overview - Sanjeevani Hospital{% endblock %}
+{% block dash_content %}
+<div class="page-head">
+  <div><h1>Hospital overview</h1><p>{% now "l, d F Y" %}</p></div>
+  <div class="d-flex gap-2 flex-wrap">
+    <a class="btn btn-outline-primary" href="{% url 'doctor_add' %}"><i class="bi bi-person-plus me-1"></i>Add doctor</a>
+    <a class="btn btn-primary" href="{% url 'admin_reports' %}"><i class="bi bi-bar-chart me-1"></i>Reports</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl"><div class="stat {% if stats.pending %}attention{% endif %}"><div class="label">Requests waiting</div><div class="value">{{ stats.pending }}</div></div></div>
+  <div class="col-6 col-xl"><div class="stat"><div class="label">Appointments today</div><div class="value">{{ stats.today }}</div></div></div>
+  <div class="col-6 col-xl"><div class="stat"><div class="label">Doctors</div><div class="value">{{ stats.doctors }}</div></div></div>
+  <div class="col-6 col-xl"><div class="stat"><div class="label">Patients</div><div class="value">{{ stats.patients }}</div></div></div>
+  <div class="col-6 col-xl"><div class="stat"><div class="label">Departments</div><div class="value">{{ stats.departments }}</div></div></div>
+</div>
+
+<div class="panel mb-4">
+  <div class="panel-head"><h2>Appointment requests</h2><a href="{% url 'admin_appointments' %}?status=pending">See all pending</a></div>
+  {% include 'partials/_appt_table.html' with appointments=pending show_patient=True show_doctor=True %}
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="panel">
+      <div class="panel-head"><h2>Today's schedule</h2></div>
+      {% include 'partials/_appt_table.html' with appointments=todays show_patient=True show_doctor=True %}
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel">
+      <div class="panel-head"><h2>Billing</h2><a href="{% url 'admin_invoices' %}">Open</a></div>
+      <div class="panel-body">
+        <div class="mb-3"><div class="text-muted small">Collected</div><div class="display-font fs-3 fw-bold">Rs. {{ paid_total|floatformat:0 }}</div></div>
+        <div><div class="text-muted small">Waiting to be paid</div><div class="display-font fs-3 fw-bold">Rs. {{ unpaid_total|floatformat:0 }}</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

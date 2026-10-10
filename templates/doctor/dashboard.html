@@ -1,0 +1,32 @@
+{% extends 'dash_base.html' %}
+{% block title %}Today - Sanjeevani Hospital{% endblock %}
+{% block dash_content %}
+<div class="page-head">
+  <div><h1>Good day, {{ doctor.full_name }}</h1><p>{{ doctor.department.name }}, {{ doctor.specialization }}</p></div>
+  <a class="btn btn-outline-primary" href="{% url 'doctor_schedule' %}"><i class="bi bi-clock me-1"></i>Edit my schedule</a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3"><div class="stat"><div class="label">Today</div><div class="value">{{ todays|length }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat {% if pending|length %}attention{% endif %}"><div class="label">Waiting for confirmation</div><div class="value">{{ pending|length }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="label">Visits completed</div><div class="value">{{ completed_count }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="label">Patients seen</div><div class="value">{{ patient_count }}</div></div></div>
+</div>
+
+<div class="panel mb-4">
+  <div class="panel-head"><h2>Today's appointments</h2></div>
+  {% include 'partials/_appt_table.html' with appointments=todays show_patient=True show_doctor=False %}
+</div>
+
+{% if pending %}
+<div class="panel mb-4">
+  <div class="panel-head"><h2>Requests to confirm</h2></div>
+  {% include 'partials/_appt_table.html' with appointments=pending show_patient=True show_doctor=False %}
+</div>
+{% endif %}
+
+<div class="panel">
+  <div class="panel-head"><h2>Next 7 days</h2><a href="{% url 'doctor_appointments' %}">All appointments</a></div>
+  {% include 'partials/_appt_table.html' with appointments=upcoming show_patient=True show_doctor=False %}
+</div>
+{% endblock %}

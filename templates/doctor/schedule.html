@@ -1,0 +1,46 @@
+{% extends 'dash_base.html' %}
+{% block title %}My schedule - Sanjeevani Hospital{% endblock %}
+{% block dash_content %}
+<div class="page-head"><div><h1>My schedule</h1><p>Patients can only book times that fall inside these blocks.</p></div></div>
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="panel">
+      <div class="panel-head"><h2>Weekly consultation hours</h2></div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead><tr><th>Day</th><th>Hours</th><th>Slot length</th><th></th></tr></thead>
+          <tbody>
+            {% for s in schedules %}
+            <tr>
+              <td class="fw-semibold">{{ s.get_weekday_display }}</td>
+              <td>{{ s.start_time|time:"g:i A" }} to {{ s.end_time|time:"g:i A" }}</td>
+              <td>{{ s.slot_minutes }} min</td>
+              <td class="text-end table-actions">
+                <form method="post" action="{% url 'schedule_delete' s.pk %}" data-confirm="Remove this time block?">{% csrf_token %}
+                  <button class="btn btn-sm btn-outline-danger" title="Remove"><i class="bi bi-trash"></i></button>
+                </form>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4"><div class="empty"><i class="bi bi-clock"></i>No hours yet. Add a block so patients can book you.</div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="panel">
+      <div class="panel-head"><h2>Add a time block</h2></div>
+      <div class="panel-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}<div class="alert alert-danger py-2">{{ form.non_field_errors }}</div>{% endif %}
+          {% for field in form %}{% include 'partials/_field.html' %}{% endfor %}
+          <button class="btn btn-primary" type="submit">Add time block</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

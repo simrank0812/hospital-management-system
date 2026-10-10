@@ -1,0 +1,40 @@
+{% extends 'dash_base.html' %}
+{% block title %}Billing - Sanjeevani Hospital{% endblock %}
+{% block dash_content %}
+<div class="page-head"><div><h1>Billing</h1><p>An invoice is created automatically when a visit is marked as completed.</p></div></div>
+<ul class="nav nav-pills mb-3">
+  <li class="nav-item"><a class="nav-link {% if not state %}active{% endif %}" href="{% url 'admin_invoices' %}">All</a></li>
+  <li class="nav-item"><a class="nav-link {% if state == 'unpaid' %}active{% endif %}" href="?state=unpaid">Unpaid</a></li>
+  <li class="nav-item"><a class="nav-link {% if state == 'paid' %}active{% endif %}" href="?state=paid">Paid</a></li>
+</ul>
+<div class="panel">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>Invoice</th><th>Patient</th><th>Doctor</th><th>Visit date</th><th class="text-end">Total</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+      <tbody>
+        {% for i in page %}
+        <tr>
+          <td class="fw-semibold">{{ i.number }}</td>
+          <td>{{ i.appointment.patient.full_name }}</td>
+          <td>{{ i.appointment.doctor.full_name }}</td>
+          <td>{{ i.appointment.date|date:"d M Y" }}</td>
+          <td class="text-end">Rs. {{ i.total|floatformat:2 }}</td>
+          <td>{% if i.is_paid %}<span class="badge text-bg-success">Paid</span>{% else %}<span class="badge text-bg-warning">Unpaid</span>{% endif %}</td>
+          <td class="text-end table-actions">
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'invoice_detail' i.pk %}">View</a>
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'invoice_edit' i.pk %}">Edit</a>
+            <form method="post" action="{% url 'invoice_toggle_paid' i.pk %}">{% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <button class="btn btn-sm {% if i.is_paid %}btn-outline-secondary{% else %}btn-success{% endif %}">{% if i.is_paid %}Mark unpaid{% else %}Mark paid{% endif %}</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7"><div class="empty"><i class="bi bi-receipt"></i>No invoices here yet.</div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include 'partials/_pagination.html' %}
+{% endblock %}

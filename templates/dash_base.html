@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+{% with url_name=request.resolver_match.url_name %}
+<div class="container-xl dash-wrap py-4">
+  <div class="row g-4">
+    <aside class="col-lg-3 col-xl-2 no-print">
+      <nav class="side-nav" aria-label="Dashboard menu">
+        <div class="side-user">
+          <span class="avatar avatar-sm">{{ user.first_name|slice:":1"|default:user.username|slice:":1"|upper }}</span>
+          <div>
+            <div class="name">{{ user.get_full_name|default:user.username }}</div>
+            <div class="role">{% if user_role == 'admin' %}Administrator{% elif user_role == 'doctor' %}Doctor{% else %}Patient{% endif %}</div>
+          </div>
+        </div>
+        <div class="nav-scroll">
+        {% if user_role == 'patient' %}
+          <a class="item {% if url_name == 'patient_dashboard' %}active{% endif %}" href="{% url 'patient_dashboard' %}"><i class="bi bi-grid"></i>Overview</a>
+          <a class="item {% if url_name == 'book_appointment' %}active{% endif %}" href="{% url 'book_appointment' %}"><i class="bi bi-calendar-plus"></i>Book appointment</a>
+          <a class="item {% if url_name == 'patient_appointments' or url_name == 'appointment_detail' %}active{% endif %}" href="{% url 'patient_appointments' %}"><i class="bi bi-calendar-check"></i>My appointments</a>
+          <a class="item {% if url_name == 'patient_invoices' or url_name == 'invoice_detail' %}active{% endif %}" href="{% url 'patient_invoices' %}"><i class="bi bi-receipt"></i>Bills</a>
+          <a class="item {% if url_name == 'patient_profile' %}active{% endif %}" href="{% url 'patient_profile' %}"><i class="bi bi-person"></i>My profile</a>
+        {% elif user_role == 'doctor' %}
+          <a class="item {% if url_name == 'doctor_dashboard' %}active{% endif %}" href="{% url 'doctor_dashboard' %}"><i class="bi bi-grid"></i>Today</a>
+          <a class="item {% if url_name == 'doctor_appointments' or url_name == 'appointment_detail' %}active{% endif %}" href="{% url 'doctor_appointments' %}"><i class="bi bi-calendar-check"></i>Appointments</a>
+          <a class="item {% if url_name == 'doctor_schedule' %}active{% endif %}" href="{% url 'doctor_schedule' %}"><i class="bi bi-clock"></i>My schedule</a>
+        {% elif user_role == 'admin' %}
+          <a class="item {% if url_name == 'admin_dashboard' %}active{% endif %}" href="{% url 'admin_dashboard' %}"><i class="bi bi-grid"></i>Overview</a>
+          <a class="item {% if url_name == 'admin_appointments' or url_name == 'appointment_detail' %}active{% endif %}" href="{% url 'admin_appointments' %}"><i class="bi bi-calendar-check"></i>Appointments</a>
+          <a class="item {% if url_name == 'admin_doctors' or url_name == 'doctor_add' or url_name == 'doctor_edit' %}active{% endif %}" href="{% url 'admin_doctors' %}"><i class="bi bi-person-badge"></i>Doctors</a>
+          <a class="item {% if url_name == 'admin_patients' %}active{% endif %}" href="{% url 'admin_patients' %}"><i class="bi bi-people"></i>Patients</a>
+          <a class="item {% if url_name == 'admin_departments' or url_name == 'department_add' or url_name == 'department_edit' %}active{% endif %}" href="{% url 'admin_departments' %}"><i class="bi bi-hospital"></i>Departments</a>
+          <a class="item {% if url_name == 'admin_invoices' or url_name == 'invoice_edit' or url_name == 'invoice_detail' %}active{% endif %}" href="{% url 'admin_invoices' %}"><i class="bi bi-receipt"></i>Billing</a>
+          <a class="item {% if url_name == 'admin_reports' %}active{% endif %}" href="{% url 'admin_reports' %}"><i class="bi bi-bar-chart"></i>Reports</a>
+          <a class="item" href="{% url 'admin:index' %}"><i class="bi bi-database-gear"></i>admin</a>
+        {% endif %}
+        </div>
+      </nav>
+    </aside>
+    <section class="col-lg-9 col-xl-10">
+      {% block dash_content %}{% endblock %}
+    </section>
+  </div>
+</div>
+{% endwith %}
+{% endblock %}

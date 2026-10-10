@@ -1,0 +1,33 @@
+{% extends 'dash_base.html' %}
+{% block title %}Appointments - Sanjeevani Hospital{% endblock %}
+{% block dash_content %}
+<div class="page-head">
+  <div><h1>Appointments</h1><p>Confirm or reject requests, and follow every visit.</p></div>
+  <a class="btn btn-outline-primary" href="{% url 'export_appointments_csv' %}"><i class="bi bi-download me-1"></i>Download CSV</a>
+</div>
+<form method="get" class="row g-2 mb-3 align-items-end">
+  <div class="col-md-4">
+    <label class="form-label" for="q">Patient or doctor</label>
+    <input id="q" type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search by name">
+  </div>
+  <div class="col-sm-6 col-md-3">
+    <label class="form-label" for="status">Status</label>
+    <select id="status" name="status" class="form-select">
+      <option value="">All statuses</option>
+      {% for code, label in statuses %}<option value="{{ code }}" {% if status == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-sm-6 col-md-3">
+    <label class="form-label" for="date">Date</label>
+    <input id="date" type="date" name="date" value="{{ day }}" class="form-control">
+  </div>
+  <div class="col-md-2 d-flex gap-2">
+    <button class="btn btn-primary" type="submit">Filter</button>
+    <a class="btn btn-outline-primary" href="{% url 'admin_appointments' %}">Clear</a>
+  </div>
+</form>
+<div class="panel">
+  {% include 'partials/_appt_table.html' with appointments=page show_patient=True show_doctor=True %}
+</div>
+{% include 'partials/_pagination.html' %}
+{% endblock %}

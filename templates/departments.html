@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Departments - Sanjeevani Hospital{% endblock %}
+{% block content %}
+<section class="page-banner">
+  <div class="container">
+    <h1>Departments</h1>
+    <p>Every speciality under one roof, each with its own team of doctors.</p>
+  </div>
+</section>
+<section class="section">
+  <div class="container">
+    <div class="row g-3">
+      {% for d in departments %}
+      <div class="col-md-6">
+        <a class="dept-tile" href="{% url 'doctor_list' %}?department={{ d.pk }}">
+          <span class="dept-icon"><i class="bi {{ d.icon }}"></i></span>
+          <span>
+            <h3>{{ d.name }}</h3>
+            <p>{{ d.description }}</p>
+            <p class="mt-2 fw-semibold text-body">{{ d.doctor_total }} doctor{{ d.doctor_total|pluralize }}</p>
+          </span>
+        </a>
+      </div>
+      {% empty %}
+      <div class="col-12"><div class="empty"><i class="bi bi-hospital"></i>No departments have been added yet.</div></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

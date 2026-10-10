@@ -1,0 +1,56 @@
+{# Variables: appointments (queryset or page), show_patient, show_doctor #}
+<div class="table-responsive">
+  <table class="table table-hover align-middle">
+    <thead>
+      <tr>
+        <th>When</th>
+        {% if show_patient %}<th>Patient</th>{% endif %}
+        {% if show_doctor %}<th>Doctor</th>{% endif %}
+        <th>Reason</th>
+        <th>Status</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in appointments %}
+      <tr>
+        <td>
+          <div class="fw-semibold">{{ a.date|date:"D, d M Y" }}</div>
+          <div class="text-muted small">{{ a.time|time:"g:i A" }}</div>
+        </td>
+        {% if show_patient %}<td>{{ a.patient.full_name }}</td>{% endif %}
+        {% if show_doctor %}
+          <td>{{ a.doctor.full_name }}<div class="text-muted small">{{ a.doctor.department.name }}</div></td>
+        {% endif %}
+        <td style="max-width: 260px;">{{ a.reason|truncatechars:70 }}</td>
+        <td><span class="badge {{ a.badge_class }}">{{ a.get_status_display }}</span></td>
+        <td class="text-end table-actions">
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'appointment_detail' a.pk %}">Open</a>
+          {% if user_role == 'admin' or user_role == 'doctor' %}
+            {% if a.status == 'pending' %}
+              <form method="post" action="{% url 'appointment_status' a.pk %}">{% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button class="btn btn-sm btn-success" name="action" value="confirm" title="Confirm this appointment"><i class="bi bi-check-lg"></i></button>
+                <button class="btn btn-sm btn-outline-danger" name="action" value="reject" title="Reject this appointment"><i class="bi bi-x-lg"></i></button>
+              </form>
+            {% elif a.status == 'confirmed' %}
+              <form method="post" action="{% url 'appointment_status' a.pk %}" data-confirm="Mark this visit as completed and create an invoice?">{% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button class="btn btn-sm btn-outline-success" name="action" value="complete" title="Mark as completed"><i class="bi bi-clipboard-check"></i></button>
+              </form>
+            {% endif %}
+          {% endif %}
+          {% if a.status == 'pending' or a.status == 'confirmed' %}
+            <form method="post" action="{% url 'appointment_status' a.pk %}" data-confirm="Cancel this appointment?">{% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <button class="btn btn-sm btn-outline-secondary" name="action" value="cancel" title="Cancel this appointment"><i class="bi bi-slash-circle"></i></button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6"><div class="empty"><i class="bi bi-calendar2-x"></i>No appointments to show here.</div></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,15 @@
+<div class="doc-card">
+  <div class="d-flex gap-3 align-items-center mb-3">
+    <span class="avatar">{{ doctor.initials }}</span>
+    <div>
+      <h3 class="h6 mb-0"><a class="text-decoration-none text-reset" href="{% url 'doctor_detail' doctor.pk %}">{{ doctor.full_name }}</a></h3>
+      <div class="meta">{{ doctor.department.name }}</div>
+    </div>
+  </div>
+  <p class="mb-1">{{ doctor.specialization }}</p>
+  <p class="meta mb-3">{{ doctor.qualification }}<br>{{ doctor.experience_years }} years of experience</p>
+  <div class="mt-auto d-flex justify-content-between align-items-center">
+    <span class="fee-tag">Rs. {{ doctor.consultation_fee|floatformat:0 }}</span>
+    <a class="btn btn-sm btn-primary" href="{% if user_role == 'patient' %}{% url 'book_appointment' %}?doctor={{ doctor.pk }}{% else %}{% url 'doctor_detail' doctor.pk %}{% endif %}">{% if user_role == 'patient' %}Book{% else %}View profile{% endif %}</a>
+  </div>
+</div>

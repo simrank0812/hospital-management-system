@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block title %}Sanjeevani Hospital - Book a doctor online{% endblock %}
+{% block content %}
+
+<section class="hero">
+  <div class="container position-relative" style="z-index: 1;">
+    <div class="row align-items-center gy-5">
+      <div class="col-lg-7">
+        <div class="hero-note"><i class="bi bi-clock-history"></i>Open every day. Emergency care around the clock.</div>
+        <h1>Book a doctor in under a minute.</h1>
+        <p class="lead mt-3 mb-4">See who is available, pick a time that suits you and arrive with your appointment already confirmed. Your prescriptions and bills stay in your account.</p>
+        <div class="d-flex flex-wrap gap-2">
+          <a class="btn btn-amber btn-lg" href="{% if user_role == 'patient' %}{% url 'book_appointment' %}{% else %}{% url 'doctor_list' %}{% endif %}">{% if user_role == 'patient' %}Book an appointment{% else %}Browse doctors{% endif %}</a>
+          {% if not user.is_authenticated %}
+            <a class="btn btn-outline-light btn-lg" href="{% url 'register' %}">Create a patient account</a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <form class="finder" method="get" action="{% url 'doctor_list' %}">
+          <h2 class="mb-3">Find a doctor</h2>
+          <div class="mb-3">
+            <label class="form-label" for="home-dept">Department</label>
+            <select id="home-dept" name="department" class="form-select">
+              <option value="">Any department</option>
+              {% for d in all_departments %}<option value="{{ d.pk }}">{{ d.name }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="home-q">Doctor name or speciality</label>
+            <input id="home-q" name="q" type="text" class="form-control" placeholder="For example: knee, Sen, diabetes">
+          </div>
+          <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search me-1"></i>Search doctors</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <svg class="ecg" viewBox="0 0 1600 110" preserveAspectRatio="none" aria-hidden="true">
+    <path pathLength="1600" d="M0 70 H300 L320 70 L335 45 L350 70 H420 L432 80 L450 10 L472 105 L486 62 H560 L585 45 L615 70 H900 L915 70 L930 45 L945 70 H1020 L1032 80 L1050 10 L1072 105 L1086 62 H1160 L1185 45 L1215 70 H1600"/>
+  </svg>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+      <div>
+        <h2 class="section-title">What we treat</h2>
+        <p class="section-sub mb-0">Pick a department to see the doctors who practise there and when they are in.</p>
+      </div>
+      <a class="btn btn-outline-primary" href="{% url 'departments' %}">All departments</a>
+    </div>
+    <div class="row g-3">
+      {% for d in departments %}
+      <div class="col-md-6 col-lg-3">
+        <a class="dept-tile" href="{% url 'doctor_list' %}?department={{ d.pk }}">
+          <span class="dept-icon"><i class="bi {{ d.icon }}"></i></span>
+          <span>
+            <h3>{{ d.name }}</h3>
+            <p>{{ d.description|truncatechars:70 }}</p>
+          </span>
+        </a>
+      </div>
+      {% empty %}
+      <div class="col-12"><div class="empty"><i class="bi bi-hospital"></i>No departments yet. Run <code>python manage.py seed_demo</code> to add demo data.</div></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section-mist">
+  <div class="container">
+    <h2 class="section-title">How booking works</h2>
+    <p class="section-sub mb-4">Three steps from symptom to waiting room.</p>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="step-num">1</div>
+        <h3 class="h5">Create your account</h3>
+        <p class="text-muted">Register once with your phone number and date of birth. Your visits and bills are saved under it.</p>
+      </div>
+      <div class="col-md-4">
+        <div class="step-num">2</div>
+        <h3 class="h5">Choose a doctor and a time</h3>
+        <p class="text-muted">Only the slots a doctor is really free are shown, so there is no back and forth to find a time.</p>
+      </div>
+      <div class="col-md-4">
+        <div class="step-num">3</div>
+        <h3 class="h5">Get your confirmation</h3>
+        <p class="text-muted">The hospital confirms your request and you can follow its status, and later your prescription, in your account.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+      <div>
+        <h2 class="section-title">Meet some of our doctors</h2>
+        <p class="section-sub mb-0">Experienced specialists who see patients every week.</p>
+      </div>
+      <a class="btn btn-outline-primary" href="{% url 'doctor_list' %}">See all doctors</a>
+    </div>
+    <div class="row g-3">
+      {% for doctor in doctors %}
+      <div class="col-md-6 col-lg-3">{% include 'partials/_doctor_card.html' %}</div>
+      {% empty %}
+      <div class="col-12"><div class="empty"><i class="bi bi-person-badge"></i>No doctors yet.</div></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="emergency">
+  <div class="container">
+    <div class="row align-items-center gy-2">
+      <div class="col-md-8">
+        <h2>Emergency? Do not book online. Call us now.</h2>
+        <p class="mb-0">Our emergency department and ambulance service are staffed 24 hours a day.</p>
+      </div>
+      <div class="col-md-4 text-md-end"><a class="phone" href="tel:+913340001234"><i class="bi bi-telephone-fill me-2"></i>+91 33 4000 1234</a></div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'dash_base.html' %}
+{% block title %}Patients - Sanjeevani Hospital{% endblock %}
+{% block dash_content %}
+<div class="page-head"><div><h1>Patients</h1><p>Patients register themselves. You can deactivate an account without losing its records.</p></div></div>
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-5"><input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search by name, username or phone" aria-label="Search patients"></div>
+  <div class="col-md-4 d-flex gap-2"><button class="btn btn-primary" type="submit">Search</button><a class="btn btn-outline-primary" href="{% url 'admin_patients' %}">Clear</a></div>
+</form>
+<div class="panel">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>Patient</th><th>Contact</th><th>Details</th><th>Visits</th><th>Account</th><th class="text-end">Actions</th></tr></thead>
+      <tbody>
+        {% for p in page %}
+        <tr>
+          <td><div class="fw-semibold">{{ p.full_name }}</div><div class="small text-muted">{{ p.patient_id }}, @{{ p.user.username }}</div></td>
+          <td>{{ p.phone }}<div class="small text-muted">{{ p.user.email }}</div></td>
+          <td>{{ p.get_gender_display }}{% if p.age %}, {{ p.age }} years{% endif %}{% if p.blood_group %}<div class="small text-muted">Blood group {{ p.blood_group }}</div>{% endif %}</td>
+          <td>{{ p.visits }}</td>
+          <td>{% if p.user.is_active %}<span class="badge text-bg-success">Active</span>{% else %}<span class="badge text-bg-secondary">Deactivated</span>{% endif %}</td>
+          <td class="text-end table-actions">
+            <form method="post" action="{% url 'patient_toggle' p.pk %}" data-confirm="{% if p.user.is_active %}Deactivate{% else %}Activate{% endif %} this account?">{% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <button class="btn btn-sm btn-outline-secondary">{% if p.user.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="empty"><i class="bi bi-people"></i>No patients found.</div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include 'partials/_pagination.html' %}
+{% endblock %}

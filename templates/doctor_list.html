@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Our doctors - Sanjeevani Hospital{% endblock %}
+{% block content %}
+<section class="page-banner">
+  <div class="container">
+    <h1>Our doctors</h1>
+    <p>Search by name, speciality or department.</p>
+  </div>
+</section>
+<section class="section">
+  <div class="container">
+    <form method="get" class="row g-2 mb-4 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label" for="q">Name or speciality</label>
+        <input id="q" type="text" name="q" value="{{ q }}" class="form-control" placeholder="For example: heart, Banerjee">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label" for="department">Department</label>
+        <select id="department" name="department" class="form-select">
+          <option value="">All departments</option>
+          {% for d in departments %}<option value="{{ d.pk }}" {% if selected_department == d.pk|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button class="btn btn-primary flex-grow-1" type="submit">Search</button>
+        <a class="btn btn-outline-primary" href="{% url 'doctor_list' %}">Clear</a>
+      </div>
+    </form>
+    <div class="row g-3">
+      {% for doctor in doctors %}
+      <div class="col-md-6 col-lg-4 col-xl-3">{% include 'partials/_doctor_card.html' %}</div>
+      {% empty %}
+      <div class="col-12"><div class="empty"><i class="bi bi-person-x"></i>No doctors match your search. Try fewer words or clear the department.</div></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

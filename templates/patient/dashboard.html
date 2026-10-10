@@ -1,0 +1,34 @@
+{% extends 'dash_base.html' %}
+{% block title %}My overview - Sanjeevani Hospital{% endblock %}
+{% block dash_content %}
+<div class="page-head">
+  <div>
+    <h1>Hello, {{ user.first_name|default:user.username }}</h1>
+    <p>Patient ID {{ patient.patient_id }}</p>
+  </div>
+  <a class="btn btn-amber" href="{% url 'book_appointment' %}"><i class="bi bi-calendar-plus me-1"></i>Book appointment</a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-4"><div class="stat"><div class="label">Upcoming visits</div><div class="value">{{ upcoming|length }}</div></div></div>
+  <div class="col-sm-4"><div class="stat {% if pending_count %}attention{% endif %}"><div class="label">Waiting for approval</div><div class="value">{{ pending_count }}</div></div></div>
+  <div class="col-sm-4"><div class="stat"><div class="label">Visits completed</div><div class="value">{{ total_visits }}</div></div></div>
+</div>
+
+{% if unpaid %}
+<div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
+  <span><i class="bi bi-receipt me-2"></i>You have {{ unpaid|length }} unpaid bill{{ unpaid|length|pluralize }}. Please pay at the hospital billing desk.</span>
+  <a class="btn btn-sm btn-outline-dark" href="{% url 'patient_invoices' %}">View bills</a>
+</div>
+{% endif %}
+
+<div class="panel mb-4">
+  <div class="panel-head"><h2>Upcoming appointments</h2><a href="{% url 'patient_appointments' %}">See all</a></div>
+  {% include 'partials/_appt_table.html' with appointments=upcoming show_patient=False show_doctor=True %}
+</div>
+
+<div class="panel">
+  <div class="panel-head"><h2>Recent completed visits</h2></div>
+  {% include 'partials/_appt_table.html' with appointments=recent show_patient=False show_doctor=True %}
+</div>
+{% endblock %}

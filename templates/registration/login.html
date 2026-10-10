@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Log in - Sanjeevani Hospital{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+<section class="auth-wrap">
+  <div class="container" style="max-width: 460px;">
+    <div class="auth-card">
+      <h1 class="h3 mb-1">Welcome back</h1>
+      <p class="text-muted mb-4">Log in as a patient, doctor or administrator.</p>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger py-2">{{ form.non_field_errors }}</div>{% endif %}
+        {% for field in form %}{% include 'partials/_field.html' %}{% endfor %}
+        <input type="hidden" name="next" value="{{ next }}">
+        <button type="submit" class="btn btn-primary w-100 mt-2">Log in</button>
+      </form>
+      <p class="text-center text-muted mt-4 mb-0">New patient? <a href="{% url 'register' %}">Create an account</a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}

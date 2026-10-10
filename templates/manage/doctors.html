@@ -1,0 +1,43 @@
+{% extends 'dash_base.html' %}
+{% block title %}Doctors - Sanjeevani Hospital{% endblock %}
+{% block dash_content %}
+<div class="page-head">
+  <div><h1>Doctors</h1><p>Add doctors and set their department and fee. Doctors manage their own hours.</p></div>
+  <a class="btn btn-amber" href="{% url 'doctor_add' %}"><i class="bi bi-person-plus me-1"></i>Add doctor</a>
+</div>
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-5"><input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search by name, speciality or department" aria-label="Search doctors"></div>
+  <div class="col-md-4 d-flex gap-2"><button class="btn btn-primary" type="submit">Search</button><a class="btn btn-outline-primary" href="{% url 'admin_doctors' %}">Clear</a></div>
+</form>
+<div class="panel">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>Doctor</th><th>Department</th><th>Fee</th><th>Visits</th><th>Online booking</th><th class="text-end">Actions</th></tr></thead>
+      <tbody>
+        {% for d in doctors %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <span class="avatar avatar-sm">{{ d.initials }}</span>
+              <div><div class="fw-semibold">{{ d.full_name }}</div><div class="small text-muted">{{ d.specialization }}</div></div>
+            </div>
+          </td>
+          <td>{{ d.department.name }}</td>
+          <td>Rs. {{ d.consultation_fee|floatformat:0 }}</td>
+          <td>{{ d.visits }}</td>
+          <td>{% if d.is_available %}<span class="badge text-bg-success">Open</span>{% else %}<span class="badge text-bg-secondary">Hidden</span>{% endif %}</td>
+          <td class="text-end table-actions">
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'doctor_edit' d.pk %}">Edit</a>
+            <form method="post" action="{% url 'doctor_delete' d.pk %}" data-confirm="Delete {{ d.full_name }} and their login account? This cannot be undone.">{% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="empty"><i class="bi bi-person-badge"></i>No doctors found.</div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

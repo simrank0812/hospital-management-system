@@ -1,0 +1,132 @@
+{% extends 'dash_base.html' %}
+{% block title %}Appointment - Sanjeevani Hospital{% endblock %}
+{% block dash_content %}
+<div class="page-head">
+  <div>
+    <h1>Appointment on {{ appointment.date|date:"d M Y" }}</h1>
+    <p>{{ appointment.time|time:"g:i A" }} with {{ appointment.doctor.full_name }}</p>
+  </div>
+  <span class="badge {{ appointment.badge_class }} fs-6">{{ appointment.get_status_display }}</span>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="panel mb-4">
+      <div class="panel-head"><h2>Details</h2></div>
+      <div class="panel-body">
+        <dl class="detail-list mb-0">
+          <dt>Doctor</dt><dd>{{ appointment.doctor.full_name }}<br><span class="text-muted">{{ appointment.doctor.department.name }}</span></dd>
+          <dt>Patient</dt>
+          <dd>{{ appointment.patient.full_name }}
+            {% if user_role != 'patient' %}
+              <br><span class="text-muted">{{ appointment.patient.patient_id }}{% if appointment.patient.age %}, {{ appointment.patient.age }} years{% endif %}, {{ appointment.patient.get_gender_display }}{% if appointment.patient.blood_group %}, blood group {{ appointment.patient.blood_group }}{% endif %}</span>
+              <br><span class="text-muted">Phone {{ appointment.patient.phone }}</span>
+            {% endif %}
+          </dd>
+          <dt>Reason for visit</dt><dd>{{ appointment.reason|linebreaksbr }}</dd>
+          {% if appointment.admin_note %}<dt>Message from the hospital</dt><dd>{{ appointment.admin_note }}</dd>{% endif %}
+          <dt>Requested on</dt><dd>{{ appointment.created_at|date:"d M Y, g:i A" }}</dd>
+        </dl>
+      </div>
+    </div>
+
+    {% if appointment.status == 'pending' or appointment.status == 'confirmed' %}
+    <div class="panel">
+      <div class="panel-head"><h2>Actions</h2></div>
+      <div class="panel-body">
+        <form method="post" action="{% url 'appointment_status' appointment.pk %}">
+          {% csrf_token %}
+          {% if user_role != 'patient' %}
+            <div class="mb-3">
+              <label class="form-label" for="admin_note">Message to the patient (optional)</label>
+              <input type="text" class="form-control" id="admin_note" name="admin_note" maxlength="200" placeholder="For example: please arrive 10 minutes early">
+            </div>
+          {% endif %}
+          <div class="d-flex flex-wrap gap-2">
+            {% if user_role != 'patient' %}
+              {% if appointment.status == 'pending' %}
+                <button class="btn btn-success" name="action" value="confirm">Confirm</button>
+                <button class="btn btn-outline-danger" name="action" value="reject">Reject</button>
+              {% else %}
+                <button class="btn btn-success" name="action" value="complete">Mark as completed</button>
+              {% endif %}
+            {% endif %}
+            <button class="btn btn-outline-secondary" name="action" value="cancel" onclick="return confirm('Cancel this appointment?')">Cancel appointment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-7">
+    <div class="panel mb-4">
+      <div class="panel-head"><h2>Consultation notes</h2></div>
+      <div class="panel-body">
+        {% if can_treat %}
+          <form method="post" action="{% url 'save_note' appointment.pk %}" novalidate>
+            {% csrf_token %}
+            {% for field in note_form %}{% include 'partials/_field.html' %}{% endfor %}
+            <button class="btn btn-primary" type="submit">Save note</button>
+          </form>
+        {% elif note %}
+          <dl class="detail-list mb-0">
+            <dt>Diagnosis</dt><dd>{{ note.diagnosis }}</dd>
+            {% if note.notes %}<dt>Advice and findings</dt><dd>{{ note.notes|linebreaksbr }}</dd>{% endif %}
+            {% if note.follow_up_date %}<dt>Follow-up</dt><dd>{{ note.follow_up_date|date:"D, d M Y" }}</dd>{% endif %}
+          </dl>
+        {% else %}
+          <p class="text-muted mb-0">No notes have been added yet. They appear here once the doctor has seen the patient.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="panel mb-4">
+      <div class="panel-head"><h2>Prescription</h2></div>
+      <div class="panel-body">
+        {% for rx in prescriptions %}
+          <div class="rx-row d-flex justify-content-between gap-3">
+            <div>
+              <div class="fw-semibold">{{ rx.medicine }} <span class="text-muted fw-normal">{{ rx.dosage }}</span></div>
+              <div class="small text-muted">{{ rx.frequency }} for {{ rx.duration }}{% if rx.instructions %}. {{ rx.instructions }}{% endif %}</div>
+            </div>
+            {% if can_treat %}
+              <form method="post" action="{% url 'delete_prescription' rx.pk %}" data-confirm="Remove {{ rx.medicine }}?">{% csrf_token %}
+                <button class="btn btn-sm btn-outline-danger" title="Remove"><i class="bi bi-trash"></i></button>
+              </form>
+            {% endif %}
+          </div>
+        {% empty %}
+          <p class="text-muted mb-0">No medicines prescribed for this visit.</p>
+        {% endfor %}
+
+        {% if can_treat %}
+          <hr>
+          <h3 class="h6">Add a medicine</h3>
+          <form method="post" action="{% url 'add_prescription' appointment.pk %}" novalidate>
+            {% csrf_token %}
+            <div class="row">
+              <div class="col-md-6">{% include 'partials/_field.html' with field=prescription_form.medicine %}</div>
+              <div class="col-md-6">{% include 'partials/_field.html' with field=prescription_form.dosage %}</div>
+              <div class="col-md-6">{% include 'partials/_field.html' with field=prescription_form.frequency %}</div>
+              <div class="col-md-6">{% include 'partials/_field.html' with field=prescription_form.duration %}</div>
+              <div class="col-12">{% include 'partials/_field.html' with field=prescription_form.instructions %}</div>
+            </div>
+            <button class="btn btn-outline-primary" type="submit"><i class="bi bi-plus-lg me-1"></i>Add medicine</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if invoice %}
+    <div class="panel">
+      <div class="panel-head"><h2>Billing</h2><a href="{% url 'invoice_detail' invoice.pk %}">Open invoice</a></div>
+      <div class="panel-body d-flex justify-content-between align-items-center">
+        <div><div class="fw-semibold">{{ invoice.number }}</div><div class="text-muted small">Rs. {{ invoice.total|floatformat:2 }}</div></div>
+        {% if invoice.is_paid %}<span class="badge text-bg-success">Paid</span>{% else %}<span class="badge text-bg-warning">Unpaid</span>{% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'dash_base.html' %}
+{% block title %}Departments - Sanjeevani Hospital{% endblock %}
+{% block dash_content %}
+<div class="page-head">
+  <div><h1>Departments</h1><p>These appear on the public website.</p></div>
+  <a class="btn btn-amber" href="{% url 'department_add' %}"><i class="bi bi-plus-lg me-1"></i>Add department</a>
+</div>
+<div class="panel">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>Department</th><th>Description</th><th>Doctors</th><th class="text-end">Actions</th></tr></thead>
+      <tbody>
+        {% for d in departments %}
+        <tr>
+          <td><span class="fw-semibold"><i class="bi {{ d.icon }} me-2 text-primary"></i>{{ d.name }}</span></td>
+          <td style="max-width: 380px;">{{ d.description|truncatechars:90 }}</td>
+          <td>{{ d.doctor_total }}</td>
+          <td class="text-end table-actions">
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'department_edit' d.pk %}">Edit</a>
+            <form method="post" action="{% url 'department_delete' d.pk %}" data-confirm="Delete the {{ d.name }} department?">{% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4"><div class="empty"><i class="bi bi-hospital"></i>No departments yet. Add the first one.</div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

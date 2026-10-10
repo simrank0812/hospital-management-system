@@ -1,0 +1,26 @@
+{% extends 'dash_base.html' %}
+{% block title %}My bills - Sanjeevani Hospital{% endblock %}
+{% block dash_content %}
+<div class="page-head"><h1>My bills</h1></div>
+<div class="panel">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>Invoice</th><th>Visit</th><th>Doctor</th><th class="text-end">Total</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for i in invoices %}
+        <tr>
+          <td class="fw-semibold">{{ i.number }}</td>
+          <td>{{ i.appointment.date|date:"d M Y" }}</td>
+          <td>{{ i.appointment.doctor.full_name }}</td>
+          <td class="text-end">Rs. {{ i.total|floatformat:2 }}</td>
+          <td>{% if i.is_paid %}<span class="badge text-bg-success">Paid</span>{% else %}<span class="badge text-bg-warning">Unpaid</span>{% endif %}</td>
+          <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{% url 'invoice_detail' i.pk %}">View</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="empty"><i class="bi bi-receipt"></i>Bills appear here after a visit is completed.</div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

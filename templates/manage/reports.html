@@ -1,0 +1,84 @@
+{% extends 'dash_base.html' %}
+{% block title %}Reports - Sanjeevani Hospital{% endblock %}
+{% block dash_content %}
+<div class="page-head">
+  <div><h1>Reports</h1><p>How busy the hospital has been and how much has been billed.</p></div>
+  <div class="d-flex gap-2 no-print">
+    <a class="btn btn-outline-primary" href="{% url 'export_appointments_csv' %}"><i class="bi bi-download me-1"></i>Appointments CSV</a>
+    <button class="btn btn-primary" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print</button>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3"><div class="stat"><div class="label">Total appointments</div><div class="value">{{ appointment_total }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="label">Completed visits</div><div class="value">{{ completed_total }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="label">Collected</div><div class="value">Rs. {{ paid_total|floatformat:0 }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat {% if unpaid_total %}attention{% endif %}"><div class="label">Waiting to be paid</div><div class="value">Rs. {{ unpaid_total|floatformat:0 }}</div></div></div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-7">
+    <div class="panel h-100"><div class="panel-head"><h2>Appointments by month</h2></div><div class="panel-body"><canvas id="monthChart" height="130"></canvas></div></div>
+  </div>
+  <div class="col-lg-5">
+    <div class="panel h-100"><div class="panel-head"><h2>Appointments by status</h2></div><div class="panel-body"><canvas id="statusChart" height="200"></canvas></div></div>
+  </div>
+  <div class="col-lg-7">
+    <div class="panel h-100"><div class="panel-head"><h2>Revenue collected by month (Rs.)</h2></div><div class="panel-body"><canvas id="revenueChart" height="130"></canvas></div></div>
+  </div>
+  <div class="col-lg-5">
+    <div class="panel h-100"><div class="panel-head"><h2>Appointments by department</h2></div><div class="panel-body"><canvas id="deptChart" height="200"></canvas></div></div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head"><h2>Busiest doctors</h2></div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead><tr><th>Doctor</th><th>Department</th><th class="text-end">Appointments</th><th class="text-end">Completed</th></tr></thead>
+      <tbody>
+        {% for d in top_doctors %}
+        <tr><td class="fw-semibold">{{ d.full_name }}</td><td>{{ d.department.name }}</td><td class="text-end">{{ d.total }}</td><td class="text-end">{{ d.done }}</td></tr>
+        {% empty %}
+        <tr><td colspan="4"><div class="empty">No data yet.</div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{{ chart_data|json_script:"chart-data" }}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+  (function () {
+    var d = JSON.parse(document.getElementById("chart-data").textContent);
+    var pine = "#115e59", amber = "#f5b83d", sea = "#6fb7ab", rose = "#d9534f", grey = "#9fb3b0";
+    Chart.defaults.font.family = "Figtree, system-ui, sans-serif";
+    Chart.defaults.color = "#587174";
+
+    new Chart(document.getElementById("monthChart"), {
+      type: "bar",
+      data: { labels: d.monthLabels, datasets: [{ label: "Appointments", data: d.monthAppointments, backgroundColor: pine, borderRadius: 6 }] },
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+    new Chart(document.getElementById("revenueChart"), {
+      type: "line",
+      data: { labels: d.monthLabels, datasets: [{ label: "Revenue", data: d.monthRevenue, borderColor: amber, backgroundColor: "rgba(245,184,61,0.2)", fill: true, tension: 0.3 }] },
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+    new Chart(document.getElementById("statusChart"), {
+      type: "doughnut",
+      data: { labels: d.statusLabels, datasets: [{ data: d.statusValues, backgroundColor: [amber, pine, sea, grey, rose] }] },
+      options: { plugins: { legend: { position: "bottom" } } }
+    });
+    new Chart(document.getElementById("deptChart"), {
+      type: "bar",
+      data: { labels: d.deptLabels, datasets: [{ label: "Appointments", data: d.deptValues, backgroundColor: sea, borderRadius: 6 }] },
+      options: { indexAxis: "y", plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+  })();
+</script>
+{% endblock %}

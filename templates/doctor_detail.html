@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}{{ doctor.full_name }} - Sanjeevani Hospital{% endblock %}
+{% block content %}
+<section class="page-banner">
+  <div class="container d-flex flex-wrap gap-4 align-items-center">
+    <span class="avatar avatar-lg" style="background: var(--amber); color: #2b1f00;">{{ doctor.initials }}</span>
+    <div>
+      <h1>{{ doctor.full_name }}</h1>
+      <p>{{ doctor.specialization }}, {{ doctor.department.name }}</p>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <h2 class="h4">About</h2>
+        <p>{{ doctor.bio|default:"This doctor has not added a biography yet." }}</p>
+        <dl class="row detail-list mt-4">
+          <dt class="col-sm-4">Qualification</dt><dd class="col-sm-8">{{ doctor.qualification }}</dd>
+          <dt class="col-sm-4">Experience</dt><dd class="col-sm-8">{{ doctor.experience_years }} years</dd>
+          <dt class="col-sm-4">Consultation fee</dt><dd class="col-sm-8">Rs. {{ doctor.consultation_fee|floatformat:0 }}</dd>
+        </dl>
+      </div>
+      <div class="col-lg-5">
+        <div class="panel">
+          <div class="panel-head"><h2>Weekly availability</h2></div>
+          <div class="panel-body">
+            {% for s in schedules %}
+              <div class="d-flex justify-content-between py-1">
+                <span class="fw-semibold">{{ s.get_weekday_display }}</span>
+                <span>{{ s.start_time|time:"g:i A" }} to {{ s.end_time|time:"g:i A" }}</span>
+              </div>
+            {% empty %}
+              <p class="text-muted mb-0">No consultation hours have been published yet.</p>
+            {% endfor %}
+            <div class="mt-4">
+              {% if user_role == 'patient' %}
+                <a class="btn btn-primary w-100" href="{% url 'book_appointment' %}?doctor={{ doctor.pk }}">Book with {{ doctor.full_name }}</a>
+              {% elif not user.is_authenticated %}
+                <a class="btn btn-primary w-100" href="{% url 'login' %}?next={% url 'book_appointment' %}%3Fdoctor%3D{{ doctor.pk }}">Log in to book</a>
+                <p class="small text-muted mt-2 mb-0">New here? <a href="{% url 'register' %}">Create a patient account</a>.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

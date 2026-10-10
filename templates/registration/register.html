@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Create a patient account - Sanjeevani Hospital{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+<section class="auth-wrap">
+  <div class="container" style="max-width: 720px;">
+    <div class="auth-card">
+      <h1 class="h3 mb-1">Create your patient account</h1>
+      <p class="text-muted mb-4">It takes about two minutes. You will use it to book visits and see your prescriptions and bills.</p>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger py-2">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="row">
+          <div class="col-md-6">{% include 'partials/_field.html' with field=form.first_name %}</div>
+          <div class="col-md-6">{% include 'partials/_field.html' with field=form.last_name %}</div>
+          <div class="col-md-6">{% include 'partials/_field.html' with field=form.email %}</div>
+          <div class="col-md-6">{% include 'partials/_field.html' with field=form.phone %}</div>
+          <div class="col-md-4">{% include 'partials/_field.html' with field=form.date_of_birth %}</div>
+          <div class="col-md-4">{% include 'partials/_field.html' with field=form.gender %}</div>
+          <div class="col-md-4">{% include 'partials/_field.html' with field=form.blood_group %}</div>
+          <div class="col-12">{% include 'partials/_field.html' with field=form.address %}</div>
+          <div class="col-12"><hr class="mt-0"></div>
+          <div class="col-md-4">{% include 'partials/_field.html' with field=form.username %}</div>
+          <div class="col-md-4">{% include 'partials/_field.html' with field=form.password1 %}</div>
+          <div class="col-md-4">{% include 'partials/_field.html' with field=form.password2 %}</div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100 mt-2">Create account</button>
+      </form>
+      <p class="text-center text-muted mt-4 mb-0">Already registered? <a href="{% url 'login' %}">Log in</a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}

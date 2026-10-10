@@ -1,0 +1,20 @@
+{% extends 'dash_base.html' %}
+{% block title %}My appointments - Sanjeevani Hospital{% endblock %}
+{% block dash_content %}
+<div class="page-head">
+  <h1>My appointments</h1>
+  <a class="btn btn-amber" href="{% url 'book_appointment' %}"><i class="bi bi-calendar-plus me-1"></i>Book appointment</a>
+</div>
+<form method="get" class="row g-2 mb-3">
+  <div class="col-sm-5 col-md-3">
+    <select name="status" class="form-select" aria-label="Filter by status" onchange="this.form.submit()">
+      <option value="">All statuses</option>
+      {% for code, label in statuses %}<option value="{{ code }}" {% if status == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </div>
+</form>
+<div class="panel">
+  {% include 'partials/_appt_table.html' with appointments=page show_patient=False show_doctor=True %}
+</div>
+{% include 'partials/_pagination.html' %}
+{% endblock %}

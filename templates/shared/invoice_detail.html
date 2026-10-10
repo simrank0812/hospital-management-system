@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}{{ invoice.number }} - Sanjeevani Hospital{% endblock %}
+{% block content %}
+<section class="py-4">
+  <div class="container">
+    <div class="d-flex justify-content-between mb-3 no-print" style="max-width: 820px; margin: 0 auto;">
+      <a class="btn btn-outline-primary" href="{% url 'appointment_detail' appointment.pk %}"><i class="bi bi-arrow-left me-1"></i>Back to appointment</a>
+      <button class="btn btn-primary" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print invoice</button>
+    </div>
+    <div class="invoice-sheet">
+      <div class="d-flex justify-content-between flex-wrap gap-3 mb-4">
+        <div class="d-flex align-items-center gap-2">
+          <span class="brand-mark"><i class="bi bi-plus-lg"></i></span>
+          <div><div class="brand-name">Sanjeevani Hospital</div><div class="small text-muted">14 Park Avenue, Kolkata 700016</div></div>
+        </div>
+        <div class="text-md-end">
+          <h1 class="h3 mb-1">Invoice {{ invoice.number }}</h1>
+          <div class="text-muted small">Issued {{ invoice.created_at|date:"d M Y" }}</div>
+          {% if invoice.is_paid %}<span class="badge text-bg-success mt-1">Paid{% if invoice.paid_at %} on {{ invoice.paid_at|date:"d M Y" }}{% endif %}</span>{% else %}<span class="badge text-bg-warning mt-1">Unpaid</span>{% endif %}
+        </div>
+      </div>
+      <div class="row mb-4">
+        <div class="col-sm-6">
+          <div class="text-muted small">Billed to</div>
+          <div class="fw-semibold">{{ appointment.patient.full_name }}</div>
+          <div class="small">{{ appointment.patient.patient_id }}, phone {{ appointment.patient.phone }}</div>
+        </div>
+        <div class="col-sm-6 mt-3 mt-sm-0">
+          <div class="text-muted small">Visit</div>
+          <div class="fw-semibold">{{ appointment.doctor.full_name }}</div>
+          <div class="small">{{ appointment.date|date:"d M Y" }}, {{ appointment.time|time:"g:i A" }}</div>
+        </div>
+      </div>
+      <table class="table">
+        <thead><tr><th>Description</th><th class="text-end">Amount (Rs.)</th></tr></thead>
+        <tbody>
+          <tr><td>Consultation fee, {{ appointment.doctor.department.name }}</td><td class="text-end">{{ invoice.consultation_fee|floatformat:2 }}</td></tr>
+          <tr><td>Medicines</td><td class="text-end">{{ invoice.medicine_charges|floatformat:2 }}</td></tr>
+          <tr><td>Other charges (tests, procedures)</td><td class="text-end">{{ invoice.other_charges|floatformat:2 }}</td></tr>
+          <tr class="total-row"><td>Total</td><td class="text-end">{{ invoice.total|floatformat:2 }}</td></tr>
+        </tbody>
+      </table>
+      {% if prescriptions %}
+        <h2 class="h6 mt-4">Medicines prescribed</h2>
+        <ul class="mb-0">{% for rx in prescriptions %}<li>{{ rx.medicine }} {{ rx.dosage }}, {{ rx.frequency }} for {{ rx.duration }}</li>{% endfor %}</ul>
+      {% endif %}
+      <p class="small text-muted mt-4 mb-0">Thank you for choosing Sanjeevani Hospital. Payment can be made at the billing desk.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
