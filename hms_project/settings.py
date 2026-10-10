@@ -4,6 +4,7 @@ Suitable for learning and demos. Before any real deployment, change SECRET_KEY,
 set DEBUG = False and fill in ALLOWED_HOSTS.
 """
 from pathlib import Path
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -55,7 +56,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "hms_project.wsgi.application"
 
-import os
 
 if os.getenv("VERCEL"):
     DATABASES = {
