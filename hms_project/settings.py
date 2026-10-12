@@ -3,18 +3,16 @@ Django settings for the Sanjeevani Hospital Management System.
 Suitable for learning and demos. Before any real deployment, change SECRET_KEY,
 set DEBUG = False and fill in ALLOWED_HOSTS.
 """
-from pathlib import Path
 import os
+from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-change-this-key-before-deploying-hms-project"
-DEBUG = True
-ALLOWED_HOSTS = [
-    ".vercel.app",
-    "localhost",
-    "127.0.0.1",
-]
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-key")
+DEBUG = os.environ.get("DEBUG", "True") == "True"
+ALLOWED_HOSTS = [".vercel.app", "localhost", "127.0.0.1"]
+CSRF_TRUSTED_ORIGINS = ["https://*.vercel.app"]
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -33,6 +31,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = "hms_project.urls"
@@ -56,13 +55,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "hms_project.wsgi.application"
 
+if os.getenv("DATABASE_URL"):
+    import dj_database_url
 
-if os.getenv("VERCEL"):
     DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": "/tmp/db.sqlite3",
-        }
+        "default": dj_database_url.config(
+            default=os.getenv("DATABASE_URL"),
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
 else:
     DATABASES = {
@@ -71,7 +72,9 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
-
+DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
+if os.getenv("VERCEL") and not os.getenv("DATABASE_URL"):
+    raise RuntimeError("DATABASE_URL is not set in Vercel environment variables")
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -87,6 +90,11 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
